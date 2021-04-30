@@ -1,0 +1,416 @@
+<HTML>
+
+<HEAD>
+<TITLE>Tic Tac Toe - By Rajesh</TITLE>
+<STYLE>
+	TD
+	{
+		width:150px;
+		height:150px;
+		cursor:hand;
+	}
+
+	.clsHead
+	{
+		color:maroon;
+		height:20px;
+		width:100px;
+		text-align:center;
+		font-style:italic;
+	}
+</STYLE>	
+
+</HEAD>
+
+<BODY topmargin = "10" leftmargin = "50">
+
+<TABLE border = "1px double" cellspacing = "0" align = "right">
+	<TR>
+		<TD class = "clsHead">You won</TD>
+		<TD class = "clsHead" id = "td1">0</TD>
+	</TR>
+	<TR>
+		<TD class = "clsHead">Computer won</TD>
+		<TD class = "clsHead" id = "td2">0</TD>
+	</TR>
+	<TR>
+		<TD class = "clsHead">Draw</TD>
+		<TD class = "clsHead" id = "td3">0</TD>
+	</TR>
+	<TR>
+		<TD colspan="2" id="tdMessage"></TD>
+	</TR>
+</TABLE>
+
+<TABLE cellspacing = "0" bordercolor = "red" id = "tblBoard" align = "center">
+	<TR>
+		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
+		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-left:1px solid;border-right:1px solid;">&nbsp;</TD>
+		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-top:1px solid;border-bottom:1px solid;">&nbsp;</TD>
+		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border:1px solid;">&nbsp;</TD>
+		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-top:1px solid;border-bottom:1px solid;">&nbsp;</TD>
+	</TR>
+	<TR>
+		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
+		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-left:1px solid;border-right:1px solid;">&nbsp;</TD>
+		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
+	</TR>
+</TABLE>
+
+<SCRIPT>
+	
+/********************************************************
+Created by: Rajesh S
+*********************************************************/
+	var objBoard 	= document.getElementById ("tblBoard");
+	objBoard 	= objBoard.children[0];
+
+	function fnPlaceUser(obj)
+	{		
+		var bgImage = obj.style.backgroundImage;
+		
+		if ( bgImage == "" )
+		{
+			obj.style.backgroundImage = "url('user.gif')";
+			obj.style.cursor	  = "default";
+			obj.placed		  = 1;
+
+			if ( fnCheckIfUserWon() )
+			{	
+				setTimeout(function() {
+					alert ( "You won the game!!!" );		
+					fnUpdateScore(1);
+					fnClear();
+				},1); 
+			}
+			else
+			{
+				fnAutoPlace();
+			}
+		}
+	}
+	
+	function fnUpdateScore(result)
+	{
+		var obj 	= document.getElementById ( "td" + result );
+		obj.innerText 	= parseInt ( obj.innerText, 10 ) + 1;
+	}
+
+	function fnAutoPlace()
+	{		
+		if (fnFindWinPos())
+		{
+			setTimeout(function() {
+				alert ( "You lose the game!!!" );	
+				fnUpdateScore(2);
+				fnClear();				
+			},1);
+			
+			return;
+		}
+		else if ( fnCheckRows() )
+		{}
+		else if ( fnCheckCols() )
+		{}
+		else if ( fnCheckDiagonals() )
+		{}
+		else
+		{
+			fnAutoFill();			
+		}
+
+		fnCheckMatchDraw(-1);	
+	}
+
+	function fnPlaceComp(obj)
+	{
+		obj.style.backgroundImage = "url('Comp.jpg')";
+		obj.style.cursor	  = "default";
+		obj.placed		  = 2;
+	}
+
+	function getRowValue(row)
+	{
+		row = parseInt(row);
+		var cell1 = objBoard.children[row].children[0].placed;
+		var cell2 = objBoard.children[row].children[1].placed;
+		var cell3 = objBoard.children[row].children[2].placed;
+		return cell1 + "" + cell2 + "" + cell3;
+	}
+
+	function fnCheckMatchDraw(curRwIndex)
+	{				
+		var MatchDraw	= 1;		
+		for ( var chkrow = 0; chkrow < 3; chkrow++ )
+		{
+			if ( chkrow != curRwIndex )
+			{
+				var strPlacements = getRowValue(chkrow);
+				if ( strPlacements.indexOf("0") != -1 )
+				{
+					MatchDraw = 0;
+					break;
+				}
+			}
+		}	
+
+		if ( MatchDraw )
+		{
+			setTimeout(function() {
+				alert ( "Match ended in a draw!!!" );	
+				fnUpdateScore(3);
+				fnClear();	
+			},1);
+		}
+	
+		return MatchDraw;
+	}
+
+	function fnAutoFill()
+	{
+		var row 	= parseInt(Math.random()*3,10);
+		var strPlacements = getRowValue(row);
+	
+		if ( strPlacements.indexOf("0") == -1 )
+		{
+			if ( fnCheckMatchDraw(row) == 0 )
+			{			
+				fnAutoFill();						
+			}
+		}
+		else
+		{		
+			var rand;
+			var patt 	= new RegExp ( 0, 'g');			
+
+			if ( strPlacements.match(patt).length > 1 )
+			{
+				var arrGetPos 	= new Array();
+				var arrCur	= strPlacements.split('');
+								
+				for ( var pos = 0; pos < arrCur.length; pos++ )
+				{
+					if ( arrCur[pos].toString() == "0" )
+					{
+						arrGetPos.push(pos);
+					}		
+				}		
+				rand 	= arrGetPos [ parseInt(Math.random()*arrGetPos.length,10) ];
+			}
+			else
+			{
+				rand 	= strPlacements.indexOf("0");
+			}
+
+			fnPlaceComp ( objBoard.children[row].children[rand] );
+		}
+	}
+
+	function fnCheckRows()
+	{		
+		for ( var row = 0; row < 3; row++ )
+		{
+			var strPlacements = getRowValue(row);
+
+			if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
+			{
+					fnPlaceComp ( objBoard.children[row].children[strPlacements.indexOf("0")] );
+					return true;
+			}
+		}
+	}
+
+	function getColValue(col)
+	{
+		col = parseInt(col);
+		var cell1 = objBoard.children[0].children[col].placed;
+		var cell2 = objBoard.children[1].children[col].placed;
+		var cell3 = objBoard.children[2].children[col].placed;
+		return cell1 + "" + cell2 + "" + cell3;
+	}
+
+	function getDiagonalValue(isLeftTopToRightBottom)
+	{
+		var cell2 = objBoard.children[1].children[1].placed;
+		var cell1, cell3;
+
+		if(isLeftTopToRightBottom == true)
+		{
+			cell1 = objBoard.children[0].children[0].placed;
+			cell3 = objBoard.children[2].children[2].placed;
+		}
+		else
+		{
+			cell1 = objBoard.children[0].children[2].placed;
+			cell3 = objBoard.children[2].children[0].placed;
+		}
+		return cell1 + "" + cell2 + "" + cell3;
+	}
+
+	function fnCheckCols()
+	{		
+		for ( var col = 0; col < 3; col++ )
+		{
+			var strPlacements = getColValue(col);
+			
+			if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
+			{	
+					fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[col] );
+					return true;
+			}
+		}
+	}
+
+	function fnCheckDiagonals()
+	{		
+		var strPlacements = getDiagonalValue(true);
+		
+		if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
+		{
+			fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[strPlacements.indexOf("0")] );
+			return true;
+		}
+		else
+		{
+			strPlacements = getDiagonalValue(false);
+			var arrPos = [ 2, 1, 0 ];
+			
+			if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
+			{		
+				var row = strPlacements.indexOf("0");
+				var col = arrPos [row];
+				fnPlaceComp ( objBoard.children[row].children[col] );
+				return true;
+			}
+		}
+	}
+
+	function fnFindWinPos()
+	{
+		var strPlacements;
+
+		for ( var row = 0; row < 3; row++ )
+		{
+			strPlacements = getRowValue(row);
+			if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
+			{
+					fnPlaceComp ( objBoard.children[row].children[strPlacements.indexOf("0")] );
+					return true;
+			}
+		}
+
+		for ( var col = 0; col < 3; col++ )
+		{
+			strPlacements = getColValue(col);			
+			if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
+			{	
+					fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[col] );
+					return true;
+			}
+		}
+
+		strPlacements = getDiagonalValue(true);
+		
+		if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
+		{
+			fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[strPlacements.indexOf("0")] );
+			return true;
+		}
+		else
+		{
+			strPlacements = getDiagonalValue(false);
+			var arrPos = [ 2, 1, 0 ];
+			
+			if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
+			{		
+				var Row = strPlacements.indexOf("0");
+				var Col = arrPos [ Row ];
+				fnPlaceComp ( objBoard.children[row].children[col] );
+				return true;
+			}
+		}
+	}
+
+	function fnCheckIfUserWon()
+	{
+		var strPlacements;
+
+		for ( var row = 0; row < 3; row++ )
+		{
+			strPlacements = getRowValue(row);
+
+			if ( strPlacements == "111" )
+			{			
+				return true;
+			}
+		}
+
+		for ( var col = 0; col < 3; col++ )
+		{
+			strPlacements = getColValue(col);
+			
+			if ( strPlacements == "111" )
+			{
+				return true;
+			}
+		}
+
+		strPlacements = getDiagonalValue(true);
+		
+		if ( strPlacements == "111" )
+		{
+			return true;
+		}
+		else
+		{
+			strPlacements = getDiagonalValue(false);
+			
+			if ( strPlacements == "111" )
+			{
+				return true;
+			}
+		}
+	}
+
+	function fnStart()
+	{
+		var randm = parseInt(Math.random()*2, 10);
+
+		if ( randm == 0 )
+		{
+			fnAutoFill();
+		}
+		else
+		{
+			setTimeout(function() {
+				alert ( "Your turn to start" );		
+			},1); 
+		}
+	}
+
+	fnClear();
+
+	function fnClear()
+	{
+		for ( var row = 0; row < 3; row++ )
+		{
+			for ( var col = 0; col < 3; col++ )
+			{
+				var obj = objBoard.children[row].children[col];
+				obj.placed 			= 0;
+				obj.style.backgroundImage 	= "";
+				obj.style.cursor	  	= "hand";
+			}
+		}
+		fnStart();
+	}
+
+window.status = "***********Tic Tac Toe****************By Rajesh********";
+
+</SCRIPT>
+
+</BODY>
+</HTML>
