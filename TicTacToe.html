@@ -1,416 +1,351 @@
-<HTML>
-
 <HEAD>
-<TITLE>Tic Tac Toe - By Rajesh</TITLE>
-<STYLE>
-	TD
-	{
-		width:150px;
-		height:150px;
-		cursor:hand;
-	}
+    <TITLE>Tic Tac Toe - By Rajesh S</TITLE>
+    <STYLE>
+        #tblBoard TD {
+        width: 150px;
+        height: 150px;
+        cursor: hand;
+        Font-weight: bold;
+        text-align: center;
+        font-size: 75px;
+        }
+        #tblScore TD {
+        color: maroon;
+        height: 20px;
+        width: 100px;
+        text-align: center;
+        font-style: italic;
+        }
+        .clsComp {
+        cursor: default;
+        background-color: red;
+        color: white;
+        }
+        .clsHuman {
+        cursor: default;
+        background-color: lime;
+        color: black;
+        }
+        .clsEmpty {
+        cursor: hand;
+        background-color: white;
+        color: black;
+        }
+    </STYLE>
+    </HEAD>
+    <BODY topmargin="10" leftmargin="50">
+        <TABLE id="tblScore" border= 1 style="border:double 1px blue;" cellspacing="5" cellpadding="5" align="right">
+            <TR>
+                <TD>You won</TD>
+                <TD id="td1">0</TD>
+            </TR>
+            <TR>
+                <TD>Computer won</TD>
+                <TD id="td2">0</TD>
+            </TR>
+            <TR>
+                <TD>Draw</TD>
+                <TD id="td3">0</TD>
+            </TR>
+        </TABLE>
 
-	.clsHead
-	{
-		color:maroon;
-		height:20px;
-		width:100px;
-		text-align:center;
-		font-style:italic;
-	}
-</STYLE>	
+        <TABLE cellspacing="5" bordercolor="red" id="tblBoard" align="center"> 
+            <TR>
+                <TD onclick="humanSelection(this);" filled="0">&nbsp;</TD>
+                <TD onclick="humanSelection(this);" filled="0" style="border-left:1px solid; border-right:1px solid; ">&nbsp;</TD>
+                <TD onclick="humanSelection(this);" filled="0">&nbsp;</TD>
+            </TR>
+                
+            <TR>
+                <TD onclick="humanSelection(this);" filled="0" style="border:1px solid;">&nbsp;</TD>
+                <TD onclick="humanSelection(this);" filled="0" style="border:1px solid;">&nbsp;</TD>
+                <TD onclick="humanSelection(this);" filled="0" style="border:1px solid;">&nbsp;</TD>
+            </TR>
+            <TR>
+                <TD onclick="humanSelection(this);" filled="0">&nbsp;</TD>
+                <TD onclick="humanSelection(this);" filled="0" style="border-left:1px solid; border-right:1px solid;">&nbsp;</TD>
+                <TD onclick="humanSelection(this);" filled="0">&nbsp;</TD>
+            </TR>
+        </TABLE>
+        <SCRIPT>
+            const Player = {
+            Human: {Filled: 1, Txt: "X", ClsNm: "clsHuman", WinPos: ["011", "101", "110"], WinPattern: ["111"]}, 
+            Computer: {Filled: 2, Txt: "O", ClsNm : "clsComp", WinPos: ["022", "202", "220"], WinPattern: ["222"]}, 
+            None: {Filled: 0, Txt: " ", ClsNm: "clsEmpty", WinPos: [], WinPattern: []}}
 
-</HEAD>
+            var objBoard = document.getElementById("tblBoard");
+            objBoard = objBoard.children[0];
 
-<BODY topmargin = "10" leftmargin = "50">
+            function humanSelection(obj)
+            {
+                if (obj.filled == 0)
+                {
+                    fillPosition(obj, Player.Human);
+                    if (checkIfWonTheGame (Player.Human.WinPattern))
+                    {
+                        setTimeout(function() { 
+                            alert( "You won the game!!!");
+                            updateScore(1);
+                            clearBoard();
+                        },1);
+                    }
+                    else if (!checkIfMatchIsDrawn()) 
+                    {
+                        computerTurn();    
+                    }                    
+                }                
+            }
 
-<TABLE border = "1px double" cellspacing = "0" align = "right">
-	<TR>
-		<TD class = "clsHead">You won</TD>
-		<TD class = "clsHead" id = "td1">0</TD>
-	</TR>
-	<TR>
-		<TD class = "clsHead">Computer won</TD>
-		<TD class = "clsHead" id = "td2">0</TD>
-	</TR>
-	<TR>
-		<TD class = "clsHead">Draw</TD>
-		<TD class = "clsHead" id = "td3">0</TD>
-	</TR>
-	<TR>
-		<TD colspan="2" id="tdMessage"></TD>
-	</TR>
-</TABLE>
+            function updateScore(result)
+            {
+                var obj=document.getElementById("td" + result);
+                obj.innerText = parseInt (obj.innerText, 10) + 1;
+            }
 
-<TABLE cellspacing = "0" bordercolor = "red" id = "tblBoard" align = "center">
-	<TR>
-		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
-		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-left:1px solid;border-right:1px solid;">&nbsp;</TD>
-		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
-	</TR>
-	<TR>
-		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-top:1px solid;border-bottom:1px solid;">&nbsp;</TD>
-		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border:1px solid;">&nbsp;</TD>
-		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-top:1px solid;border-bottom:1px solid;">&nbsp;</TD>
-	</TR>
-	<TR>
-		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
-		<TD onclick = "fnPlaceUser(this);" placed ="0" style = "border-left:1px solid;border-right:1px solid;">&nbsp;</TD>
-		<TD onclick = "fnPlaceUser(this);" placed ="0">&nbsp;</TD>
-	</TR>
-</TABLE>
+            function computerTurn()
+            {
+                autoFill();
+                if (checkIfWonTheGame (Player.Computer.WinPattern))
+                {
+                    setTimeout(function() {
+                                            alert ( "You lose the game!!!" );
+                                            updateScore(2);
+                                            clearBoard();
+                                            },1);
+                    return;
+                }
+                checkIfMatchIsDrawn();
+            }
 
-<SCRIPT>
-	
-/********************************************************
-Created by: Rajesh S
-*********************************************************/
-	var objBoard 	= document.getElementById ("tblBoard");
-	objBoard 	= objBoard.children[0];
+            function fillPosition(objPos, objPlayer)
+            {
+                objPos.innerText = objPlayer.Txt;
+                objPos.filled = objPlayer.Filled;
+                objPos.className = objPlayer.ClsNm;
+            }
 
-	function fnPlaceUser(obj)
-	{		
-		var bgImage = obj.style.backgroundImage;
-		
-		if ( bgImage == "" )
-		{
-			obj.style.backgroundImage = "url('user.gif')";
-			obj.style.cursor	  = "default";
-			obj.placed		  = 1;
+            function checkIfMatchIsDrawn()
+            {
+                for (var chkrow = 0; chkrow < 3; chkrow++)
+                {
+                    var strPlacements = getRowColValue(1, chkrow);
+                    if (strPlacements.indexOf("0") != -1) 
+                    {
+                        return false;
+                    }
+                }
 
-			if ( fnCheckIfUserWon() )
-			{	
-				setTimeout(function() {
-					alert ( "You won the game!!!" );		
-					fnUpdateScore(1);
-					fnClear();
-				},1); 
-			}
-			else
-			{
-				fnAutoPlace();
-			}
-		}
-	}
-	
-	function fnUpdateScore(result)
-	{
-		var obj 	= document.getElementById ( "td" + result );
-		obj.innerText 	= parseInt ( obj.innerText, 10 ) + 1;
-	}
+                setTimeout(function() {
+                                        alert("Match ended in a draw!!!");
+                                        updateScore(3);
+                                        clearBoard();
+                                        },1);
+                return true;
+            }
 
-	function fnAutoPlace()
-	{		
-		if (fnFindWinPos())
-		{
-			setTimeout(function() {
-				alert ( "You lose the game!!!" );	
-				fnUpdateScore(2);
-				fnClear();				
-			},1);
-			
-			return;
-		}
-		else if ( fnCheckRows() )
-		{}
-		else if ( fnCheckCols() )
-		{}
-		else if ( fnCheckDiagonals() )
-		{}
-		else
-		{
-			fnAutoFill();			
-		}
+            function autoFill()
+            {
+                var positionToFill = getPositionWithMaxMinPossibilities();
+                //console.log(positionToFill);
+                fillPosition(objBoard.children[positionToFill[0]].children[positionToFill[1]], Player.Computer);
+            }
 
-		fnCheckMatchDraw(-1);	
-	}
+            function getPositionWithMaxMinPossibilities()
+            {
+                var arrPositions = [[-1, -1, -1],[-1, -1, -1],[-1, -1, -1]];
+                var strDiagValues1 = getDiagonalValue(1);
+                var strDiagValues2 = getDiagonalValue(0);
+                var arrCompWinCombinations = Player.Computer.WinPos;
+                var arrHumanWinCombinations = Player.Human.WinPos;
+                
+                for (var parseRow = 0; parseRow < arrPositions.length; parseRow++)
+                {
+                    for (var parseCol = 0; parseCol < arrPositions.length; parseCol++)
+                    {
+                        if(objBoard.children[parseRow].children[parseCol].filled == 0)
+                        {
+                            var strRowValues = getRowColValue(1, parseRow);
+                            var strColValues = getRowColValue(0, parseCol);
+                            var patt = new RegExp(0, 'g');
+                            var score = 0;
+                            var noOfRowOccurances = (strRowValues.match(patt) != null ? strRowValues.match(patt).length: 0);
+                            var noOfColOccurances = (strColValues.match(patt) != null ? strColValues.match(patt).length: 0);
 
-	function fnPlaceComp(obj)
-	{
-		obj.style.backgroundImage = "url('Comp.jpg')";
-		obj.style.cursor	  = "default";
-		obj.placed		  = 2;
-	}
+                            var noOfDiag1Occurances = (strDiagValues1.match(patt) != null? strDiagValues1.match(patt).length: 0);
 
-	function getRowValue(row)
-	{
-		row = parseInt(row);
-		var cell1 = objBoard.children[row].children[0].placed;
-		var cell2 = objBoard.children[row].children[1].placed;
-		var cell3 = objBoard.children[row].children[2].placed;
-		return cell1 + "" + cell2 + "" + cell3;
-	}
+                            var noOfDiag2Occurances = (strDiagValues2.match(patt) != null ? strDiagValues2.match(patt).length: 0); 
 
-	function fnCheckMatchDraw(curRwIndex)
-	{				
-		var MatchDraw	= 1;		
-		for ( var chkrow = 0; chkrow < 3; chkrow++ )
-		{
-			if ( chkrow != curRwIndex )
-			{
-				var strPlacements = getRowValue(chkrow);
-				if ( strPlacements.indexOf("0") != -1 )
-				{
-					MatchDraw = 0;
-					break;
-				}
-			}
-		}	
+                            if (strRowValues == arrCompWinCombinations [0] || strRowValues == arrCompWinCombinations [1] || strRowValues == arrCompWinCombinations[2]) 
+                            score = score + 100;
 
-		if ( MatchDraw )
-		{
-			setTimeout(function() {
-				alert ( "Match ended in a draw!!!" );	
-				fnUpdateScore(3);
-				fnClear();	
-			},1);
-		}
-	
-		return MatchDraw;
-	}
+                            if (strColValues == arrCompWinCombinations[0] || strColValues == arrCompWinCombinations[1] || strColValues == arrCompWinCombinations[2])
+                            score = score + 100;
 
-	function fnAutoFill()
-	{
-		var row 	= parseInt(Math.random()*3,10);
-		var strPlacements = getRowValue(row);
-	
-		if ( strPlacements.indexOf("0") == -1 )
-		{
-			if ( fnCheckMatchDraw(row) == 0 )
-			{			
-				fnAutoFill();						
-			}
-		}
-		else
-		{		
-			var rand;
-			var patt 	= new RegExp ( 0, 'g');			
+                            if (((parseCol == 0 && parseRow == 0) || (parseCol == 2 && parseRow == 2) || (parseCol == 1 && parseRow == 1))
+                            && (strDiagValues1 == arrCompWinCombinations[0] || strDiagValues1 == arrCompWinCombinations[1] || strDiagValues1== arrCompWinCombinations[2]))
+                            score = score + 100;
 
-			if ( strPlacements.match(patt).length > 1 )
-			{
-				var arrGetPos 	= new Array();
-				var arrCur	= strPlacements.split('');
-								
-				for ( var pos = 0; pos < arrCur.length; pos++ )
-				{
-					if ( arrCur[pos].toString() == "0" )
-					{
-						arrGetPos.push(pos);
-					}		
-				}		
-				rand 	= arrGetPos [ parseInt(Math.random()*arrGetPos.length,10) ];
-			}
-			else
-			{
-				rand 	= strPlacements.indexOf("0");
-			}
+                            if (((parseCol == 2 && parseRow == 0) || (parseCol == 0 && parseRow == 2) || (parseCol == 1 && parseRow == 1))
+                            && (strDiagValues2 == arrCompWinCombinations [0] || strDiagValues2 == arrCompWinCombinations [1] || strDiagValues2== arrCompWinCombinations[2]))
+                            score = score + 100;
 
-			fnPlaceComp ( objBoard.children[row].children[rand] );
-		}
-	}
+                            if (strRowValues == arrHumanWinCombinations[0] || strRowValues == arrHumanWinCombinations[1] || strRowValues == arrHumanWinCombinations [2])
+                            score = score + 50;
 
-	function fnCheckRows()
-	{		
-		for ( var row = 0; row < 3; row++ )
-		{
-			var strPlacements = getRowValue(row);
+                            if (strColValues == arrHumanWinCombinations[0] || strColValues == arrHumanWinCombinations[1] || strColValues == arrHumanWinCombinations[2])
+                            score = score + 50;
 
-			if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
-			{
-					fnPlaceComp ( objBoard.children[row].children[strPlacements.indexOf("0")] );
-					return true;
-			}
-		}
-	}
+                            if (((parseCol == 0 && parseRow == 0) || (parseCol == 2 && parseRow == 2) || (parseCol == 1 && parseRow == 1))
+                            && (strDiagValues1 == arrHumanWinCombinations[0] || strDiagValues1 == arrHumanWinCombinations [1] || strDiagValues1 == arrHumanWinCombinations[2]))
+                            score = score + 50;
 
-	function getColValue(col)
-	{
-		col = parseInt(col);
-		var cell1 = objBoard.children[0].children[col].placed;
-		var cell2 = objBoard.children[1].children[col].placed;
-		var cell3 = objBoard.children[2].children[col].placed;
-		return cell1 + "" + cell2 + "" + cell3;
-	}
+                            if (((parseCol == 2 && parseRow == 0) || (parseCol == 0 && parseRow == 2) || (parseCol == 1 && parseRow == 1)) && (strDiagValues2 == arrHumanWinCombinations[0] || strDiagValues2 == arrHumanWinCombinations [1] || strDiagValues2 == arrHumanWinCombinations [2])) 
+                            score = score + 50;
 
-	function getDiagonalValue(isLeftTopToRightBottom)
-	{
-		var cell2 = objBoard.children[1].children[1].placed;
-		var cell1, cell3;
+                            if (noOfRowOccurances > 1 && strRowValues.indexOf(Player.Computer.Filled) != -1) 
+                            score = score + 3;
 
-		if(isLeftTopToRightBottom == true)
-		{
-			cell1 = objBoard.children[0].children[0].placed;
-			cell3 = objBoard.children[2].children[2].placed;
-		}
-		else
-		{
-			cell1 = objBoard.children[0].children[2].placed;
-			cell3 = objBoard.children[2].children[0].placed;
-		}
-		return cell1 + "" + cell2 + "" + cell3;
-	}
+                            if (noOfColOccurances > 1 && strColValues.indexOf(Player.Computer.Filled) != -1) 
+                            score = score + 3;
 
-	function fnCheckCols()
-	{		
-		for ( var col = 0; col < 3; col++ )
-		{
-			var strPlacements = getColValue(col);
-			
-			if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
-			{	
-					fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[col] );
-					return true;
-			}
-		}
-	}
+                            if (((parseCol == 0 & parseRow == 0) || (parseCol == 2 && parseRow == 2) || (parseCol == 1 && parseRow == 1)) && noOfDiag1Occurances > 1 && strDiagValues1.indexOf(Player.Computer.Filled) != -1) 
+                            score = score + 3;
 
-	function fnCheckDiagonals()
-	{		
-		var strPlacements = getDiagonalValue(true);
-		
-		if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
-		{
-			fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[strPlacements.indexOf("0")] );
-			return true;
-		}
-		else
-		{
-			strPlacements = getDiagonalValue(false);
-			var arrPos = [ 2, 1, 0 ];
-			
-			if (strPlacements == "101" || strPlacements == "110" || strPlacements == "011")
-			{		
-				var row = strPlacements.indexOf("0");
-				var col = arrPos [row];
-				fnPlaceComp ( objBoard.children[row].children[col] );
-				return true;
-			}
-		}
-	}
+                            if (((parseCol == 2 && parseRow == 0) || (parseCol == 0 && parseRow == 2) || (parseCol == 1 && parseRow == 1)) && noOfDiag2Occurances > 1 && strDiagValues2.indexOf(Player.Computer.Filled) != -1) 
+                            score = score + 3;
 
-	function fnFindWinPos()
-	{
-		var strPlacements;
+                            if (noOfRowOccurances > 1 && strRowValues.indexOf(Player.Human.Filled) != -1) 
+                            score = score + 2;
 
-		for ( var row = 0; row < 3; row++ )
-		{
-			strPlacements = getRowValue(row);
-			if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
-			{
-					fnPlaceComp ( objBoard.children[row].children[strPlacements.indexOf("0")] );
-					return true;
-			}
-		}
+                            if (noOfColOccurances > 1 && strColValues.indexOf(Player.Human.Filled) != -1) 
+                            score = score + 2;
 
-		for ( var col = 0; col < 3; col++ )
-		{
-			strPlacements = getColValue(col);			
-			if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
-			{	
-					fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[col] );
-					return true;
-			}
-		}
+                            if (((parseCol == 0 && parseRow == 0) || (parseCol == 2 && parseRow == 2) || (parseCol == 1 && parseRow == 1)) && noOfDiag1Occurances > 1 && strDiagValues1.indexOf(Player.Human.Filled) != -1) 
+                            score = score + 4;
 
-		strPlacements = getDiagonalValue(true);
-		
-		if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
-		{
-			fnPlaceComp ( objBoard.children[strPlacements.indexOf("0")].children[strPlacements.indexOf("0")] );
-			return true;
-		}
-		else
-		{
-			strPlacements = getDiagonalValue(false);
-			var arrPos = [ 2, 1, 0 ];
-			
-			if (strPlacements == "202" || strPlacements == "220" || strPlacements == "022")
-			{		
-				var Row = strPlacements.indexOf("0");
-				var Col = arrPos [ Row ];
-				fnPlaceComp ( objBoard.children[row].children[col] );
-				return true;
-			}
-		}
-	}
+                            if (((parseCol == 2 && parseRow == 0) || (parseCol == 0 && parseRow == 2) || (parseCol == 1 && parseRow == 1)) && noOfDiag2Occurances > 1 && strDiagValues2.indexOf(Player.Human.Filled) != -1) score = score + 4;
 
-	function fnCheckIfUserWon()
-	{
-		var strPlacements;
+                            if (noOfRowOccurances == 3) 
+                            score++;
 
-		for ( var row = 0; row < 3; row++ )
-		{
-			strPlacements = getRowValue(row);
+                            if (noOfColOccurances == 3)
+                            score++;
 
-			if ( strPlacements == "111" )
-			{			
-				return true;
-			}
-		}
+                            if (((parseCol == 0 && parseRow == 0) || (parseCol == 2 && parseRow == 2) || (parseCol == 1 && parseRow == 1)) && noOfDiag1Occurances == 3)
+                            score++;
 
-		for ( var col = 0; col < 3; col++ )
-		{
-			strPlacements = getColValue(col);
-			
-			if ( strPlacements == "111" )
-			{
-				return true;
-			}
-		}
+                            if (((parseCol == 2 && parseRow == 0) || (parseCol == 0 && parseRow == 2) || (parseCol == 1 && parseRow == 1))
+                            && noOfDiag2Occurances == 3)
+                            score++;
 
-		strPlacements = getDiagonalValue(true);
-		
-		if ( strPlacements == "111" )
-		{
-			return true;
-		}
-		else
-		{
-			strPlacements = getDiagonalValue(false);
-			
-			if ( strPlacements == "111" )
-			{
-				return true;
-			}
-		}
-	}
+                            arrPositions [parseRow] [parseCol] = score;
+                        }
+                    }
+                }
+                //console.log(arrPositions);
+                return findMaxWithIndex(arrPositions);
+            }
 
-	function fnStart()
-	{
-		var randm = parseInt(Math.random()*2, 10);
+            function findMaxWithIndex(arr)
+            {
+                let arrMaxIndexes = new Array();
+                const maxValue = Math.max(...arr.flat());
+                for (let row= 0; row < arr.length; row++)
+                {
+                    for (let col = 0; col < arr[row].length; col++)
+                    {
+                        if (arr[row][col] == maxValue)
+                        {
+                            arrMaxIndexes.push([row, col]);
+                        }
+                    }
+                }
+                return arrMaxIndexes[parseInt(Math.random()* arrMaxIndexes.length, 10)];
+            }
 
-		if ( randm == 0 )
-		{
-			fnAutoFill();
-		}
-		else
-		{
-			setTimeout(function() {
-				alert ( "Your turn to start" );		
-			},1); 
-		}
-	}
+            function getRowColValue(isRow, rowColNr)
+            { 
+                rowColNr = parseInt(rowColNr);
+                var cell1 = objBoard.children[(isRow ==1? rowColNr: 0)].children[(isRow ==1?0: rowColNr)].filled;
+                var cell2 = objBoard.children[(isRow ==1? rowColNr: 1)].children[(isRow ==1?1: rowColNr)].filled;
+                var cell3 = objBoard.children[(isRow ==1? rowColNr: 2)].children[(isRow ==1?2: rowColNr)].filled;
+                return cell1+"" + cell2 + "" + cell3;
+            }
 
-	fnClear();
+            function getDiagonalValue(isLeftTopToRightBottom)
+            {
+                var cell2 = objBoard.children[1].children[1].filled;
+                var cell1, cell3;
 
-	function fnClear()
-	{
-		for ( var row = 0; row < 3; row++ )
-		{
-			for ( var col = 0; col < 3; col++ )
-			{
-				var obj = objBoard.children[row].children[col];
-				obj.placed 			= 0;
-				obj.style.backgroundImage 	= "";
-				obj.style.cursor	  	= "hand";
-			}
-		}
-		fnStart();
-	}
+                if (isLeftTopToRightBottom == true) {
+                    cell1 = objBoard.children[0].children[0].filled;
+                    cell3 = objBoard.children[2].children[2].filled;
+                }
+                else {
+                    cell1 = objBoard.children[0].children[2].filled;
+                    cell3 = objBoard.children[2].children[0].filled;
+                }
+                return cell1 + "" + cell2 + "" + cell3;
+            }
 
-window.status = "***********Tic Tac Toe****************By Rajesh********";
+            function checkIfWonTheGame(strWinPattern)
+            {
+                for (var rowCol = 0; rowCol < 3; rowCol++)
+                {
+                    var strPlacementsRow = getRowColValue(1, rowCol); 
+                    var strPlacementsCol = getRowColValue(0, rowCol);
 
-</SCRIPT>
+                    if (strPlacementsRow == strWinPattern || strPlacementsCol == strWinPattern)
+                    { 
+                        return true; 
+                    }
+                }
 
-</BODY>
+                var strPlacements = getDiagonalValue(true);
+                if (strPlacements == strWinPattern)
+                {
+                    return true; 
+                }
+                else
+                {
+                    strPlacements = getDiagonalValue(false);
+                    if (strPlacements == strWinPattern)
+                    { 
+                        return true; 
+                    }
+                }
+            }
+
+            function startGame()
+            {
+                var randm = parseInt(Math.random()*2, 10);
+                if (randm == 0)
+                {
+                    //Comp to start
+                    autoFill();
+                }
+                else
+                {
+                    //Human to start
+                    setTimeout(function() {
+                                            alert("Your turn to start" );
+                                            }, 1);
+                }
+            }
+
+            clearBoard();
+
+            function clearBoard()
+            {
+                for (var row = 0; row < 3; row++) 
+                {
+                    for (var col = 0; col < 3; col++)
+                    { 
+                        fillPosition(objBoard.children[row].children[col], Player.None);
+                    }
+                }
+                startGame();
+            }
+        </SCRIPT>
+    </BODY>
 </HTML>
